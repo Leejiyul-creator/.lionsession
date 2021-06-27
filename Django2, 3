@@ -1,0 +1,91 @@
+#Django_기본 파일 : 
+mysite/__init__.py : 빈 파일, 연결된 파이썬에게 해당 폴더가 파이썬 패키지에 해당한다는 것을 알려준다.
+mysite/urls.py : django 프로젝트를 위한 url 선언, 개발된 사이트의 목차 역할을 한다.
+mystie/asgi.py : ASGI(Asynchronous Server Gateway Interface, web server와 프레임워크(Django), 어플리케이션을 비동기로 연결해 주는 Python의 표준 인터페이스)가 호환되는 웹서버의 진입지점으로 django project 를 수행한다.
+mysite/wsgi.py : WSGI(Web Server Gatewat Interface, 파이썬 스크립트가 웹 서버와 통신하기 위한 인터페이스)가 호환되는 웹서버의 진입지점으로 django project 를 수행한다.
+
+#Django_CRUD : 
+📥 Create : 데이터 생성
+👀 Read : 데이터 불러오기
+✍️ Update : 데이터 수정 / 갱신
+📤 Delete : 데이터 삭제하기
+
+#Django_Template 상속 : 
+Html 문서 중 기본이 되는 문서를 템플릿으로 정함, 이는 공통의 코드이므로 다른 문서에서 기본 템플릿의 코드가 필요하면 상속하여 사용한다.
+[방법] 
+1. 템플릿 상속을 위해 기본이 되는 'base.html'을 만든다.
+2. 각 html 파일 최상단에 base.html을 상속받는 다는 사실을 명시해준다. {% extends 'base.html' %}
+
+#Django_Static :
+Static files (정적파일) : 이미지, JavaScript, CSS과 같은 추가 파일을 일컫는 말, 미리 서버에 저장되어있는 파일, 데이터베이스에 있는 그대로 구현됨.
+1. 프로젝트에 이미 저장되어져 있는 파일, 개발할 때 이미 준비되어진 파일 = "Static"
+2. 웹 서비스 이용자들이 업로드하는 파일 = "Media"
+(Dynamic files (동적파일) : 서버 데이터들이 일정 수준 이상 가공된 후 제공되는 서비스 파일)
+[방법]
+1. APP폴더 안에 Static 폴더 제작
+2. Static 파일의 위치와 저장 장소를 Setting.py에 코드로 작성한다.
+3. 1)STATIC_URL : static 파일에 접근할 URL 작성, 2)STATICFILES_DIRS : static 파일의 위치 작성, 3)STATIC_ROOT : 어디에 모이는지에 대한 정보 작성
+
+#Django_User_이론
+[목적] 
+기본 User 모델이 제공하는 필드 외에 추가적인 사용자 정보, 프로필 등을 저장하고 싶은 경우, 기본 User 모델의 비밀번호 알고리즘을 변경하고 싶은 경우 사용한다.
+
+[User model 종류]
+1. username 
+2. first_name(필수 사항), last_name(선택 사항)
+2. 회원가입
+3. 로그인
+4. 로그아웃
+
+[User 모델 확장 기법]
+1. 프록시 모델 사용하기
+2. User 모델과 일대일관계의 프로필 테이블 추가하기
+3. AbstractUser 모델 상속한 사용자 정의 User 모델 사용하기
+4. AbstractBaseUser 모델 상속한 사용자 정의 User 모델 사용하기
+
+#Django_User_실습
+*import 파일명(라이브러리) : 이미 만들어져있는 파이썬 프로그램, 라이브러리 안의 파일을 사용할 수 있도록 가져오는 명령어
+*from 파일명(라이브러리, 모듈명) import (함수, 클래스, 변수) : 모듈 안 특정한 함수, 클래스, 변수만을 가져오도록 하고 싶을 때 사용하는 명령어
+
+[Proxy Model 사용]
+from django.contrib.auth.models import User
+from .managers import PersonManager
+
+class Person(User):
+    objects = PersonManager()
+
+    class Meta:
+        proxy = True
+        ordering = ('first_name', )
+
+    def do_something(self):
+        ...
+        
+1. User 모델을 상속한 person 클래스를 정의한다. 
+2. Meta 내부 클래스를 정의하며 Proxy Model 클래스임을 선언한다.
+*Proxy Model : 새 테이블을 추가하는 등 데이터 베이스 스키마 변경 없이 단순히 상속한 클래스를 의미함, 방대한 클래스에 전체 명령 내리는 것이 비효율적이므로 특정 기능을 분리 가능하도록 하는 것
+
+[User Model  1:1 링크 사용]
+1. 1:1 링크 (One-To-One Field) 데이터베이스 테이블을 통해 기존 사용자 모델과 일대일 관계를 맺는 것
+2. 인증 프로세스와 관련 없는 기존 사용자 모델의 추가 정보를 입력, 저장해야하는 경우 사용한다.
+
+[AbstractBaseUser Model 상속한 사용자 정의 User 모델 사용] 
+1. 완전히 새로운 사용자 모델로 상속되므로 될 수 있다면 프로젝트 시작 시 수행하도록 한다. 
+2. 응용 프로그램에서 인증 프로세스와 관련된 특정 요구사항이 있을 경우 사용한다.
+3. AUTH_USER_MODEL = 'core.User' 과 같은 방식으로 기본 모델이 아닌 사용자 지정 모델은 setting.py를 업데이트 한다. 
+
+[정리]
+1. Proxy Model: 장고 기본 모델 사용하되 특정 기능 한정해 명령을 내린다, 추가 정보를 저장할 필요가 없습니다.
+2. User Moder 1:1 링크 사용: Django가 auth를 처리하는 방식, 기존 사용자 모델의 추가 정보를 저장해야한다. 
+3. AbstractBaseUser Model: Django가 auth를 처리하는 방식을 사용하나 별도의 모델을 만들지 않고도 추가 속성 업데이트 가능(setting.py를 활용한다.)
+
+
+#Django_배포
+1. Heroku 
+2. Ubuntu 
+
+  *멋쟁이사자처럼 강의를 들었으나, 강의의 내용이 어려워서 실습보단 용어와 프로젝트 약어, 문법에 대해 공부했습니다. 
+  공부한 용어와 내용 첨부합니다. 🦁
+
+
+참고 자료 링크 : https://youtu.be/alrLd9T96aA, https://djangojeng-e.github.io/2020/04/11/Writing-your-first-Django-app-part1-%EC%B4%88%EA%B8%B0%EC%84%A4%EC%A0%95/ 
